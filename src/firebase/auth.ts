@@ -1,39 +1,61 @@
-import { getAuth, createUserWithEmailAndPassword, validatePassword } from "firebase/auth";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  User,
+  onAuthStateChanged
+} from "firebase/auth";
+import app from './config';
 
-const auth = getAuth();
+const auth = getAuth(app);
 
-// Fonction pour vérifier la validité du mot de passe
-export async function checkPasswordValidity(password: string) {
-  const status = await validatePassword(getAuth(), password);
-  return {
-    isValid: status.isValid,
-    // requirements: {
-    //   needsLowerCase: status.containsLowercaseLetter !== true,
-    //   needsUpperCase: status.containsUppercaseLetter !== true,
-    //   needsNumeric: status.containsNumericCharacter !== true,
-    //   needsNonAlphanumeric: status.containsNonAlphanumericCharacter !== true,
-    //   meetsCriteria: status.meetsAllRequirements === true,
-    //   tooShort: status.isLongEnough !== true
-    // }
-  };
+// Fonction d'inscription
+export async function signUp(email: string, password: string): Promise<User> {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error: any) {
+    console.error("Erreur d'inscription:", error.code, error.message);
+    throw error;
+  }
 }
 
-createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // ..
-  });
+// Fonction de connexion
+export async function signIn(email: string, password: string): Promise<User> {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error: any) {
+    console.error("Erreur de connexion:", error.code, error.message);
+    throw error;
+  }
+}
 
-  import { getAuth, signOut } from "firebase/auth";
+// Fonction de déconnexion
+export async function signOut(): Promise<void> {
+  try {
+    await firebaseSignOut(auth);
+    console.log("Déconnexion réussie");
+  } catch (error: any) {
+    console.error("Erreur lors de la déconnexion:", error);
+    throw error;
+  }
+}
 
-signOut(auth).then(() => {
-  // Sign-out successful.
-}).catch((error) => {
-  // An error happened.
-});
+// Fonction pour obtenir l'utilisateur actuel
+export function getCurrentUser(): User | null {
+  return auth.currentUser;
+}
+
+// Vérifier si le mot de passe est valide (version simplifiée)
+export function checkPasswordValidity(password: string): boolean {
+  return password.length >= 6;
+}
+
+// Fonction pour observer les changements d'authentification
+export function observeAuthState(callback: (user: User | null) => void) {
+  return onAuthStateChanged(auth, callback);
+}
+
+export { auth };
