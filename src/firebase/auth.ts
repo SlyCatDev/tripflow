@@ -6,6 +6,7 @@ import {
   User,
   onAuthStateChanged,
 } from "firebase/auth";
+import { Alert } from 'react-native';
 import app from './config';
 import { addUser } from './firestore';
 
@@ -43,14 +44,48 @@ export async function signIn(email: string, password: string): Promise<User> {
   }
 }
 
-export async function signOut(): Promise<void> {
-  try {
-    await firebaseSignOut(auth);
-    console.log("Déconnexion réussie");
-  } catch (error: any) {
-    console.error("Erreur lors de la déconnexion:", error);
-    throw error;
+
+export async function SignOut(options?: { 
+  router?: any;  // Instance router d'Expo
+  redirectTo?: string; // Route de redirection après déconnexion 
+  showConfirmation?: boolean; // Afficher une confirmation avant déconnexion
+  onSuccess?: () => void; // Callback en cas de succès
+  onError?: (error: any) => void; // Callback en cas d'erreur
+}): Promise<void> {
+  const performSignOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      console.log("Déconnexion réussie");
+      
+      if (options?.router && options?.redirectTo) {
+        options.router.replace(options.redirectTo);
+      }
+      
+      options?.onSuccess?.();
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+      options?.onError?.(error);
+      throw error;
+    }
+  };
+
+  if (options?.showConfirmation && typeof Alert !== 'undefined') {
+    Alert.alert(
+      "Déconnexion",
+      "Êtes-vous sûr de vouloir vous déconnecter ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        { 
+          text: "Déconnexion", 
+          style: "destructive", 
+          onPress: performSignOut 
+        }
+      ]
+    );
+    return;
   }
+  
+  return performSignOut();
 }
 
 export function getCurrentUser(): User | null {

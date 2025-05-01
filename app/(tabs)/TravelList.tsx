@@ -9,6 +9,7 @@ import { db } from '@/src/firebase/config';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
+import { AppStyles } from '@/constants/Colors';
 
 interface Trip {
   id: string;
@@ -178,7 +179,8 @@ export default function TravelList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: AppStyles.spacing.contentPadding,
+    paddingTop: AppStyles.spacing.topPadding,
     backgroundColor: '#f5f5f5',
   },
   header: {

@@ -95,7 +95,7 @@ export default function SignUp() {
           disabled={isLoading}
         >
           <Text style={styles.buttonText}>
-            {isLoading ? 'Création...' : 'Créer un compte'}
+            {isLoading ? 'Création en cours' : 'Créer un compte'}
           </Text>
         </TouchableOpacity>
       </View>

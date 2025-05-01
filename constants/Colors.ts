@@ -24,3 +24,11 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
 };
+
+// Constantes de style communes pour l'application
+export const AppStyles = {
+  spacing: {
+    topPadding: 40, // Padding supérieur standard pour les écrans
+    contentPadding: 16, // Padding standard pour le contenu
+  }
+};

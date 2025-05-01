@@ -1,11 +1,5 @@
 import { Timestamp, GeoPoint } from "firebase/firestore";
-import { LocalTripStep, TripStepCreateData, TripStepFormData, TripStep } from "@/types/tripTypes";
-
-/**
- * Convertit un LocalTripStep (format du formulaire avec Date JS) en TripStepCreateData (format Firebase avec Timestamp)
- */
-
-
+import { TripStepFormData, TripStep } from "@/types/tripTypes";
 
 /**
  * Convertit un TripStep (format complet Firebase) en TripStepFormData (format pour édition dans le formulaire)

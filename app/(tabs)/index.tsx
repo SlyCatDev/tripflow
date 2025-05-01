@@ -12,7 +12,6 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Récupérer l'utilisateur courant
     const currentUser = getCurrentUser();
     
     if (currentUser) {
@@ -25,11 +24,10 @@ export default function HomeScreen() {
     setLoading(false);
   }, []);
 
-  // Afficher un indicateur de chargement pendant la vérification de l'authentification
   if (loading) {
     return (
       <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ThemedText>Chargement...</ThemedText>
+        <ThemedText>Veuillez patienter</ThemedText>
       </ThemedView>
     );
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator, View } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 import { addTripStep, updateTripStep } from '@/src/firebase/firestore';
@@ -71,6 +71,9 @@ export default function TripStepForm({
   
   // --- Chargement des données existantes ---
   useEffect(() => {
+    console.log("TripStepForm monté avec tripId:", tripId);
+    console.log("Mode formulaire:", isEditMode ? "Édition" : "Création");
+    
     if (existingStep) {
       console.log("Chargement des données de l'étape existante:", existingStep.id);
       setFormData({
@@ -87,7 +90,7 @@ export default function TripStepForm({
         setEndDate(existingStep.endDate.toDate());
       }
     }
-  }, [existingStep]);
+  }, [existingStep, tripId]);
   
   // --- Gestionnaires ---
   const updateFormData = (field: string, value: string) => {
@@ -166,8 +169,6 @@ export default function TripStepForm({
         };
         
         console.log("Données de l'étape à ajouter:", JSON.stringify(stepData));
-        const newStepId = await addTripStep(stepData);
-        console.log("Nouvelle étape ajoutée avec ID:", newStepId);
       }
       
       // --- Succès ---

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { signIn, signUp } from '@/src/firebase/auth';
+import { signIn } from '@/src/firebase/auth';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -24,35 +24,6 @@ export default function SignIn() {
         error.code === 'auth/invalid-credential' 
           ? 'Email ou mot de passe incorrect' 
           : 'Une erreur est survenue lors de la connexion'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (!email || !password) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
-      return;
-    }
-    
-    if (password.length < 6) {
-      Alert.alert('Erreur', 'Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await signUp(email, password);
-      Alert.alert('Succès', 'Compte créé avec succès', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') }
-      ]);
-    } catch (error: any) {
-      Alert.alert(
-        'Erreur d\'inscription', 
-        error.code === 'auth/email-already-in-use' 
-          ? 'Cet email est déjà utilisé' 
-          : 'Une erreur est survenue lors de l\'inscription'
       );
     } finally {
       setIsLoading(false);
@@ -87,7 +58,7 @@ export default function SignIn() {
         onPress={handleLogin}
         disabled={isLoading}>
         <Text style={styles.buttonText}>
-        {isLoading ? 'Connexion...' : 'Se connecter'}
+        {isLoading ? 'Connexion en cours' : 'Se connecter'}
         </Text>
       </TouchableOpacity>
       </View>

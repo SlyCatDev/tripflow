@@ -3,34 +3,21 @@ import { useRouter } from 'expo-router';
 
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { signOut } from '@/src/firebase/auth';
+import { SignOut } from '@/src/firebase/auth';
+import { AppStyles } from '@/constants/Colors';
 
 export default function Settings() {
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    Alert.alert(
-      "Déconnexion",
-      "Êtes-vous sûr de vouloir vous déconnecter ?",
-      [
-        {
-          text: "Annuler",
-          style: "cancel"
-        },
-        {
-          text: "Déconnexion",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await signOut();
-              router.replace('/signin');
-            } catch (error) {
-              Alert.alert("Erreur", "Problème lors de la déconnexion. Veuillez réessayer.");
-            }
-          }
-        }
-      ]
-    );
+  const handleUserSignOut = () => {
+    SignOut({
+      router: router,
+      redirectTo: '/signin',
+      showConfirmation: true,
+      onError: (error) => {
+        Alert.alert("Erreur", "Problème lors de la déconnexion. Veuillez réessayer.");
+      }
+    });
   };
 
   return (
@@ -63,7 +50,7 @@ export default function Settings() {
         
         <TouchableOpacity 
           style={styles.signOutButton}
-          onPress={handleSignOut}
+          onPress={handleUserSignOut}
         >
           <ThemedText style={styles.signOutText}>Se déconnecter</ThemedText>
         </TouchableOpacity>
@@ -75,9 +62,10 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: AppStyles.spacing.topPadding,
   },
   scrollContent: {
-    padding: 20,
+    padding: AppStyles.spacing.contentPadding,
   },
   title: {
     marginBottom: 30,
@@ -94,7 +82,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   signOutButton: {
-    backgroundColor: '#DC3545',
+    backgroundColor: '#ff3b30',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

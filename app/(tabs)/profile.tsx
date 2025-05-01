@@ -3,12 +3,13 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useState, useEffect } from 'react';
-import { auth, getCurrentUser, signOut } from '@/src/firebase/auth';
+import { getCurrentUser, SignOut } from '@/src/firebase/auth';
 import { collection, getDocs, query, orderBy, limit, where, Timestamp, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/src/firebase/config';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
+import { AppStyles } from '@/constants/Colors';
 
 interface Trip {
   id: string;
@@ -86,30 +87,29 @@ export default function Profile() {
     fetchUserData();
   }, [router]);
   
-  // Fonction pour formater les dates Firestore
-  const formatFirestoreDate = (timestamp: Timestamp | undefined): string => {
-    if (!timestamp || typeof timestamp.toDate !== 'function') {
-      return 'Date non disponible';
-    }
-    return format(timestamp.toDate(), 'dd MMMM yyyy', { locale: fr });
-  };
-  
-  // Fonction pour formater la date de création du compte (timestamp en milliseconds)
-  const formatCreationDate = (timestamp: number | undefined): string => {
-    if (!timestamp) {
-      return 'Date non disponible';
-    }
-    return format(new Date(timestamp), 'dd MMMM yyyy', { locale: fr });
+  // Fonction mutualisée pour formater les dates (Firestore Timestamp ou timestamp en millisecondes)
+  const formatDate = (date: Timestamp | number | undefined): string => {
+    if (!date) return 'Date non disponible';
+    
+    const dateObject = date instanceof Timestamp && typeof date.toDate === 'function' 
+      ? date.toDate() 
+      : typeof date === 'number' 
+        ? new Date(date) 
+        : null;
+        
+    return dateObject 
+      ? format(dateObject, 'dd MMMM yyyy', { locale: fr }) 
+      : 'Date non disponible';
   };
   
   // Fonction de déconnexion
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.push('/signin');
-    } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
-    }
+  const handleUserSignOut = () => {
+    SignOut({
+      router: router,
+      redirectTo: '/signin',
+      showConfirmation: true,
+      onError: (error) => console.error("Erreur lors de la déconnexion:", error)
+    });
   };
   
   // Navigation vers le dernier voyage
@@ -127,7 +127,7 @@ export default function Profile() {
   if (loading) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText>Chargement du profil...</ThemedText>
+        <ThemedText>Chargement du profil en cours</ThemedText>
       </ThemedView>
     );
   }
@@ -166,7 +166,7 @@ export default function Profile() {
           <View style={styles.statsItem}>
             <IconSymbol name="calendar" size={24} color="#0a7ea4" />
             <ThemedText style={styles.statsValue}>
-              {userProfile?.createdAt ? formatCreationDate(userProfile.createdAt).split(' ')[2] : '---'}
+              {userProfile?.createdAt ? formatDate(userProfile.createdAt).split(' ')[2] : '---'}
             </ThemedText>
             <ThemedText style={styles.statsLabel}>Membre depuis</ThemedText>
           </View>
@@ -179,7 +179,7 @@ export default function Profile() {
           <View style={styles.infoItem}>
             <ThemedText style={styles.infoLabel}>Date d'inscription</ThemedText>
             <ThemedText style={styles.infoValue}>
-              {userProfile?.createdAt ? formatCreationDate(userProfile.createdAt) : 'Non disponible'}
+              {userProfile?.createdAt ? formatDate(userProfile.createdAt) : 'Non disponible'}
             </ThemedText>
           </View>
         </ThemedView>
@@ -203,7 +203,7 @@ export default function Profile() {
               <View style={styles.tripInfo}>
                 <ThemedText style={styles.tripTitle}>{lastTrip.title}</ThemedText>
                 <ThemedText style={styles.tripDates}>
-                  {formatFirestoreDate(lastTrip.startDate)} - {formatFirestoreDate(lastTrip.endDate)}
+                  {formatDate(lastTrip.startDate)} - {formatDate(lastTrip.endDate)}
                 </ThemedText>
               </View>
             </TouchableOpacity>
@@ -225,7 +225,7 @@ export default function Profile() {
         
         {/* Bouton de déconnexion */}
         <TouchableOpacity 
-          onPress={handleSignOut} 
+          onPress={handleUserSignOut} 
           style={[styles.actionButton, styles.signOutButton]}
         >
           <ThemedText style={styles.buttonText}>Se déconnecter</ThemedText>
@@ -238,7 +238,8 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: AppStyles.spacing.contentPadding,
+    paddingTop: AppStyles.spacing.topPadding,
     backgroundColor: '#f5f5f5',
   },
   profileHeader: {

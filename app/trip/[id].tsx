@@ -43,6 +43,11 @@ export default function TripDetail() {
     fetchSteps();
   }, [tripId]);
 
+  // Log pour déboguer l'état du formulaire
+  useEffect(() => {
+    console.log("État du formulaire d'ajout d'étape:", showAddStepForm ? "Visible" : "Caché");
+  }, [showAddStepForm]);
+
   // Charger les détails du voyage
   const fetchTrip = async () => {
     if (!tripId) return;
@@ -278,8 +283,13 @@ export default function TripDetail() {
           <TouchableOpacity 
             style={styles.addButton}
             onPress={() => {
+              console.log("Bouton d'ajout d'étape appuyé");
               setStepToEdit(null); // Réinitialiser l'étape à éditer
               setShowAddStepForm(!showAddStepForm);
+              // Utiliser un petit délai pour s'assurer que l'état est bien mis à jour
+              setTimeout(() => {
+                console.log("État du formulaire après clic: ", showAddStepForm ? "Caché" : "Visible");
+              }, 100);
             }}
           >
             <IconSymbol 
@@ -292,11 +302,13 @@ export default function TripDetail() {
 
         {/* Formulaire d'ajout/modification d'étape */}
         {showAddStepForm && (
-          <TripStepForm 
-            tripId={tripId} 
-            existingStep={stepToEdit || undefined}
-            onSuccess={handleFormSuccess}
-          />
+          <View style={styles.formContainer}>
+            <TripStepForm 
+              tripId={tripId} 
+              existingStep={stepToEdit || undefined}
+              onSuccess={handleFormSuccess}
+            />
+          </View>
         )}
 
         {/* Liste des étapes */}
@@ -438,7 +450,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   addButton: {
-    padding: 4,
+    padding: 8,
+    backgroundColor: '#e6f2f5',
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   stepCard: {
     padding: 16,
@@ -577,5 +596,8 @@ const styles = StyleSheet.create({
   },
   journalHeader: {
     marginBottom: 8,
+  },
+  formContainer: {
+    marginBottom: 16,
   },
 });
