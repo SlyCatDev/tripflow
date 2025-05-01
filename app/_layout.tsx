@@ -1,15 +1,16 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, SplashScreen } from 'expo-router';
+import { Stack, useRouter, SplashScreen, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import 'react-native-reanimated';
+import { getAuth } from 'firebase/auth';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { observeAuthState } from '@/src/firebase/auth';
+import app from '@/src/firebase/config';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -19,6 +20,7 @@ export default function RootLayout() {
   });
   const [isUserAuthenticated, setIsUserAuthenticated] = useState<boolean | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (loaded) {
@@ -27,14 +29,22 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    // Observer les changements d'état d'authentification
+    const auth = getAuth(app);
     const unsubscribe = observeAuthState((user) => {
+      console.log('État d\'authentification :', user ? 'Connecté' : 'Déconnecté');
+      
       if (user) {
         setIsUserAuthenticated(true);
-        router.replace('/(tabs)');
+        // Navigation vers la page d'accueil uniquement si nous ne sommes pas déjà sur une page des tabs
+        if (!router.canGoBack() || pathname === '/signin' || pathname === '/signup') {
+          router.replace('/(tabs)');
+        }
       } else {
         setIsUserAuthenticated(false);
-        router.replace('/signin');
+        // Seulement rediriger vers signin si nous ne sommes pas déjà sur signin ou signup
+        if (pathname !== '/signin' && pathname !== '/signup') {
+          router.replace('/signin');
+        }
       }
       
       // Cacher l'écran de démarrage une fois la vérification terminée
@@ -43,7 +53,7 @@ export default function RootLayout() {
 
     // Nettoyer l'observateur
     return () => unsubscribe();
-  }, []);
+  }, [router, pathname]);
 
   if (!loaded || isUserAuthenticated === null) {
     return <View style={{ flex: 1 }} />;

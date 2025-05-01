@@ -16,6 +16,10 @@ const MAPPING = {
   'gear': 'settings',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'plus.circle.fill': 'add-circle',
+  'minus.circle.fill': 'remove-circle',
+  'airplane': 'flight',
+  'trash': 'delete',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

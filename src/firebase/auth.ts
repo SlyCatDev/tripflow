@@ -4,24 +4,35 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   User,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "firebase/auth";
 import app from './config';
+import { addUser } from './firestore';
 
 const auth = getAuth(app);
 
-// Fonction d'inscription
+// Fonction d'inscription avec création de profil utilisateur
 export async function signUp(email: string, password: string): Promise<User> {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    const user = userCredential.user;
+    
+    // Créer un profil utilisateur dans Firestore
+    await addUser({
+      userId: user.uid,
+      email: user.email || email,
+      displayName: user.displayName || email.split('@')[0],
+      // photoURL: user.photoURL || undefined,
+      createdAt: Date.now()
+    });
+    
+    return user;
   } catch (error: any) {
     console.error("Erreur d'inscription:", error.code, error.message);
     throw error;
   }
 }
 
-// Fonction de connexion
 export async function signIn(email: string, password: string): Promise<User> {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -32,7 +43,6 @@ export async function signIn(email: string, password: string): Promise<User> {
   }
 }
 
-// Fonction de déconnexion
 export async function signOut(): Promise<void> {
   try {
     await firebaseSignOut(auth);
@@ -43,17 +53,14 @@ export async function signOut(): Promise<void> {
   }
 }
 
-// Fonction pour obtenir l'utilisateur actuel
 export function getCurrentUser(): User | null {
   return auth.currentUser;
 }
 
-// Vérifier si le mot de passe est valide (version simplifiée)
 export function checkPasswordValidity(password: string): boolean {
   return password.length >= 6;
 }
 
-// Fonction pour observer les changements d'authentification
 export function observeAuthState(callback: (user: User | null) => void) {
   return onAuthStateChanged(auth, callback);
 }
